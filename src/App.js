@@ -1,25 +1,86 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import Forside from './components/Forside/Forside';
+import Footer from './components/Footer/Footer'
+import Desktop from './components/Navigation/Desktop';
+import Mobile from './components/Navigation/Mobile';
+import MultiFetch from './components/MultiFetch/MultiFetch';
+import Ratings from './components/Ratings/Ratings';
+import Fetch from './components/Fetch/Fetch';
+import Login from './components/Login/Login';
+import PostForm from './components/PostForm/PostForm';
+import Search from './components/Search/Search';
+//Styles
+import './MediaQueries.scss'
+import './GlobalStyles.scss'
+
 
 function App() {
+  useEffect(() => {
+    if(sessionStorage.getItem("token")){
+      setLoginData(JSON.parse(sessionStorage.getItem("token")))
+    }
+  }, [])
+
+  const [loginData, setLoginData] = useState([])
+
+  console.log(loginData)
+
+  async function doFetch(url){
+    try {
+        const response = await fetch(url)
+        const data = await response.json()
+        return data
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Desktop/>
+      <div className="mobileMenu">
+      <Mobile pageWrapId={"page-wrap"} outerContainerId={"App"} />
+      <div id="page-wrap"></div>
+      </div>
+{/* ----CONTENT CONTROL---- */}
+<div className="Content">
+      <Switch>
+
+      <Route path="/search">
+        <Search doFetch={doFetch} loginData={loginData} setLoginData={setLoginData}/>
+        </Route>
+
+      <Route path="/postform">
+        <PostForm doFetch={doFetch} loginData={loginData} setLoginData={setLoginData}/>
+        </Route>
+
+      <Route path="/login">
+        <Login doFetch={doFetch} loginData={loginData} setLoginData={setLoginData}/>
+        </Route>
+
+      <Route path="/ratings">
+        <Ratings doFetch={doFetch} loginData={loginData}/>
+        </Route>
+
+      <Route path="/multifetch">
+        <MultiFetch doFetch={doFetch}/>
+        </Route>
+
+        <Route path="/fetch">
+        <Fetch doFetch={doFetch}/>
+        </Route>
+
+        <Route path="/">
+        <Forside doFetch={doFetch}/>
+      </Route>
+
+      </Switch>
+</div>
+{/* ----CONTENT CONTROL END---- */}
+      <Footer/>
+    </Router>
   );
 }
 
